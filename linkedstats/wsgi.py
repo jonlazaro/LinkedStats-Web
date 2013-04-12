@@ -16,6 +16,7 @@ framework.
 import os, sys
 
 sys.path.append('/home/jon/linkedstats')
+sys.path.append('/home/jon/linkedstats/linkedstats')
 
 #os.environ.setdefault("DJANGO_SETTINGS_MODULE", "linkedstats.settings")
 os.environ['DJANGO_SETTINGS_MODULE'] = 'linkedstats.settings'
