@@ -27,7 +27,6 @@
         <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/style.css"/>
         <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/prettify.css"/>
 
-	    <!--link rel="stylesheet" href="{{ STATIC_PREFIX }}css/ikelin-bootstrap-datepicker/bootstrap-datepicker.min.css"/-->
         <style type="text/css">
             pre
             {    
@@ -43,51 +42,49 @@
     </head>
 
     <body onload="init();">
-        <header><!--a href="http://helheim.deusto.es/bizkaisense/"><img src="{{ STATIC_PREFIX }}img/bizkaisense.png" width=250 /></a-->
-<h1><a href="/">LinkedStats</a></h1>
+    <h1><a>LinkedStats</a></h1>
 
-</header>
-
-        <div class="container" style="min-height: 600px;">
-
-        <div class="navbar navbar-fixed-top">
-            <div class="navbar-inner">
-                <div class="container">
-                    <a class="brand" href="/">LinkedStats</a>
-                    <ul class="nav">
-                        <li class="divider-vertical"></li>
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Waste & Population in Biscay<b class="caret"></b></a>
-                            <ul class="dropdown-menu">
-                              <li id="tit-map"><a href="/">Waste generation heatmap</a></li>
-                              <li id="tit-pop"><a href="/population/">Population statistics</a></li>
-                              <li id="tit-municip"><a href="/municipality/">Data per municipality</a></li>
-                            </ul>
-                        </li>
-                        <li id="tit-doc"><a href="/doc">Documentation</a></li>
-                        <li><a href="http://helheim.deusto.es/linkedstats/sparql" target="_blank">SPARQL Endpoint</a></li>
-                    </ul>
-                    <a data-toggle="modal" href="#myModal" class="btn btn-primary btn-small pull-right">SPARQL queries used in this page&nbsp;&nbsp;&nbsp;<img src="{{ STATIC_PREFIX }}img/rdf-icon.png" width=25/></a>
-                </div>
-              </div>
+    <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container">
+                <a class="brand" href="{% url website.views.index %}">LinkedStats</a>
+                <ul class="nav">
+                    <li class="divider-vertical"></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Waste & Population in Biscay<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                          <li id="tit-map"><a href="{% url website.views.index %}">Waste generation heatmap</a></li>
+                          <li id="tit-pop"><a href="{% url website.views.population %}">Population statistics</a></li>
+                          <li id="tit-municip"><a href="{% url website.views.municipality_search %}">Data per municipality</a></li>
+                        </ul>
+                    </li>
+                    <li id="tit-doc"><a href="/doc">Documentation</a></li>
+                    <li><a href="http://helheim.deusto.es/linkedstats/sparql" target="_blank">SPARQL Endpoint</a></li>
+                </ul>
+                <a data-toggle="modal" href="#myModal" class="btn btn-primary btn-small pull-right">SPARQL queries used in this page&nbsp;&nbsp;&nbsp;<img src="{{ STATIC_PREFIX }}img/rdf-icon.png" width=25/></a>
             </div>
+        </div>
+    </div>
 
-            <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h3 id="myModalLabel">SPARQL Queries</h3>
-              </div>
-              <div class="modal-body">
-                <p>{% block sparqlmodal %}No SPARQL queries in this page{% endblock %}</p>
-              </div>
-              <div class="modal-footer">
-                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-              </div>
-            </div>
-            
-            {% block content %}
-                <!-- Your custom block content -->
-            {% endblock %}
+    <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="myModalLabel">SPARQL Queries</h3>
+        </div>
+        <div class="modal-body">
+            <p>{% block sparqlmodal %}No SPARQL queries in this page{% endblock %}</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+        </div>
+    </div>
+
+
+    <div class="container" style="min-height: 600px;">
+
+        {% block content %}
+            <!-- Your custom block content -->
+        {% endblock %}
 
         <hr class="span11">
         <footer>
@@ -104,27 +101,11 @@
                 </div>
             </div>
         </footer>
-        </div>
-
-        <!--div id="push"></div>
-
-        <footer>
-            <div id="footer-div" class="span4 offset3">
-			<h5>Participantes: </h5>
-	                <a href="http://www.deustotech.eu" target="_blank"><img src="{{ STATIC_PREFIX }}img/deustotech.jpg" width=130/></a>
-	                <a href="http://www.deusto.es" target="_blank"><img src="{{ STATIC_PREFIX }}img/deusto.png" width=130/></a>
-	    </div>
-            <div id="footer-div" class="span4">
-		        <h5>Financiado por: </h5>
-			<a href="http://www.bizkailab.deusto.es/" target="_blank"><img src="{{ STATIC_PREFIX }}img/bizkailab.png" width=130 /></a>
-	                <a href="http://www.bizkaia.net" target="_blank"><img src="{{ STATIC_PREFIX }}img/bizkaia.png" width=130/></a>
-	    </div>
-        </footer-->
+    </div>
 
         <!-- Scripts here ↓ -->
         <script src="{{ STATIC_PREFIX }}js/jquery-1.8.3.min.js"></script>
         <script src="{{ STATIC_PREFIX }}js/bootstrap.min.js"></script>
-        <!--script src="{{ STATIC_PREFIX }}js/proj4js-compressed.js"></script-->
         <script src="{{ STATIC_PREFIX }}js/jquery.lazyload.min.js"></script>
         <script src="{{ STATIC_PREFIX }}js/script.js"></script>
         <script src="{{ STATIC_PREFIX }}js/prettify.js"></script>
