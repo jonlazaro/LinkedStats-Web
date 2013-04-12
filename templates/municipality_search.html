@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load static %}
+{% load jsonify %}
+{% load partition %}
+{% get_static_prefix as STATIC_PREFIX %}
+
+{% block stylesheets %}
+	<style>
+	    .typeahead strong {
+		   	padding: 0;
+		   	font-weight: normal;
+		   	color: black;
+	    }
+	</style>
+{% endblock %}
+
+
+{% block content %}
+	<h1 class="text-center"><small>Municipality search</small></h1>
+	<br />
+	<p>Search by name:</p>
+	<p>
+		<div class="input-append">
+			<input type="text" id="search-text" class="span4" style="margin: 0 auto;" data-provide="typeahead" data-items="5" data-source='{{ all_municipality_names|jsonify }}' autocomplete="off">
+			<button class="btn" onClick="return searchSubmit(document.getElementById('search-text').value);">Go!</button>
+		</div>
+	</p>
+	<p>Or select a municipality of the list:</p>
+	<div class="well span9">
+		{% for mun_part in all_municipality_names|partition:"3" %}
+			<ul class="unstyled span3">
+				{% for mun in mun_part %}
+			  	<li><a href="{% url website.views.municipality mun %}">{{ mun }}</a></li>
+			  	{% endfor %}
+			</ul>
+		 {% endfor %}
+	</div>
+{% endblock %}
+
+{% block scripts %}
+  	<script>
+		$('#search-text').on('change', function (e) { searchSubmit(this.value); })
+
+		function searchSubmit(name) {
+			location.href = '{% url website.views.municipality " " %}'.replace("%20", name);
+		}
+
+		$('#tit-municip').addClass('active');
+	</script>
+{% endblock %}

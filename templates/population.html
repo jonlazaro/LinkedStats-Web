@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load static %}
+{% load jsonify %}
+{% get_static_prefix as STATIC_PREFIX %}
+
+{% block stylesheets %}
+  <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/nv.d3.css"/>
+  <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/slider.css"/>
+  <style>
+    #yearsdatalider .slider-handle {
+		background: #015b4e;
+	}
+  </style>
+{% endblock %}
+
+{% block sparqlmodal %}
+This query gets the population of every municipality in Biscay by age ranges:
+<pre class="prettyprint">
+{{ population_query }}
+</pre>
+{% endblock %}
+
+{% block content %}
+<h1 class="text-center"><small>Population in Biscay</small></h1>
+<br />
+<p>This chart shows the population of every municipality in Biscay organized by age ranges.</p>
+<br />
+<div class="text-center">
+	<b>2008</b>&nbsp;&nbsp;&nbsp;<input type="text" class="span3" value="" data-slider-id="yearsdatalider" data-slider-min="2008" data-slider-max="2012" data-slider-step="1" data-slider-value="2008" id="yearslider" data-slider-handle="round" >&nbsp;&nbsp;&nbsp;<b>2012</b>
+</div>
+<br />
+<div class="img-polaroid">
+	<div class="chartdiv" id="population_barchart"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ STATIC_PREFIX }}js/d3.v2.min.js" type="text/javascript"></script>
+	<script type="text/javascript" src="{{ STATIC_PREFIX }}js/bootstrap-slider.js"></script>
+
+	<script type="text/javascript">
+	var slider = $('#yearslider').slider();
+
+	function init() {
+		var popallyears = {{ population|jsonify|safe }}
+
+		var chartChange = function() {
+			$("#population_barchart").html("");
+			var populationdata = popallyears[slider.getValue()+''];
+	    	draw_population_barchart(populationdata);
+	    };
+		
+		slider = $('#yearslider').slider()
+			.on('slide', chartChange)
+			.data('slider');
+
+		draw_population_barchart(popallyears['2008']);
+	}
+
+	// Function for drawing population data.
+	function draw_population_barchart(data) {
+	  var jsonObj = []
+
+	  // Adapt data to NVD3.js format
+	  for (municipality in data)
+	  {
+	  		var tempjson = {};
+	  		tempjson['Municipality'] = municipality;
+	    	for (ageRange in data[municipality])
+	      		tempjson[ageRange] = data[municipality][ageRange];
+
+			keys = Object.keys(tempjson);
+			keys.sort();
+			//var tempkeys = keys.slice(keys.indexOf("5-9") + 1);
+			//keys.pop();
+			//keys = keys.splice(1,0,"5-9");
+			keys.splice(keys.indexOf("5-9"), 1);
+			keys.splice(1,0,"5-9");
+			console.log(keys);
+
+			var orderedtempjson = {}
+
+			for (var i = 0; i < keys.length; i++)
+			{
+			    key = keys[i];
+			    orderedtempjson[key] = tempjson[key];
+			}
+	      	jsonObj.push(orderedtempjson);
+	   }
+
+		var margin = {top: 20, right: 20, bottom: 0, left: 40},
+		    width = 960 - margin.left - margin.right,
+		    height = 800 - margin.top - margin.bottom;
+
+		var x = d3.scale.ordinal()
+		    .rangeRoundBands([0, width], .1);
+
+		var y = d3.scale.linear()
+		    .rangeRound([height, 0]);
+
+		var color = d3.scale.category20();
+		    //.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+		var xAxis = d3.svg.axis()
+		    .scale(x)
+		    .orient("bottom");
+
+		var yAxis = d3.svg.axis()
+		    .scale(y)
+		    .orient("left")
+		    .tickFormat(d3.format(".2s"));
+
+		var svg = d3.select("#population_barchart").append("svg")
+		    .attr("width", width + margin.left + margin.right)
+		    .attr("height", height + margin.top + margin.bottom)
+		  .append("g")
+		    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		var data = jsonObj;
+
+		  color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Municipality"; }));
+
+		  data.forEach(function(d) {
+		    var y0 = 0;
+		    d.ages = color.domain().map(function(name) { return {name: name, y0: y0, y1: y0 += +d[name]}; });
+		    d.total = d.ages[d.ages.length - 1].y1;
+		  });
+
+		  data.sort(function(a, b) { return b.total - a.total; });
+
+		  x.domain(data.map(function(d) { return d.Municipality; }));
+		  y.domain([0, d3.max(data, function(d) { return d.total; })]);
+
+		  svg.append("g")
+		      .attr("class", "x axis")
+		      .attr("transform", "translate(0," + height + ")")
+		      .call(xAxis)
+		      .selectAll("text")  
+		            .style("text-anchor", "end")
+		            .attr("dx", "-.8em")
+		            .attr("dy", "-.7em")
+		            .attr("transform", function(d) {
+		                return "rotate(-90)" 
+		                });
+
+		  svg.append("g")
+		      .attr("class", "y axis")
+		      .call(yAxis)
+
+
+		  var state = svg.selectAll(".state")
+		      .data(data)
+		    .enter().append("g")
+		      .attr("class", "g")
+		      .attr("transform", function(d) { return "translate(" + x(d.Municipality) + ",0)"; });
+
+		  state.selectAll("rect")
+		      .data(function(d) { return d.ages; })
+		    .enter().append("rect")
+		      .attr("width", x.rangeBand())
+		      .attr("y", function(d) { return y(d.y1); })
+		      .attr("height", function(d) { return y(d.y0) - y(d.y1); })
+		      .style("fill", function(d) { return color(d.name); });
+
+		  var legend = svg.selectAll(".legend")
+		      .data(color.domain().slice().reverse())
+		    .enter().append("g")
+		      .attr("class", "legend")
+		      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+		  legend.append("rect")
+		      .attr("x", width - 18)
+		      .attr("width", 18)
+		      .attr("height", 18)
+		      .style("fill", color);
+
+		  legend.append("text")
+		      .attr("x", width - 24)
+		      .attr("y", 9)
+		      .attr("dy", ".35em")
+		      .style("text-anchor", "end")
+		      .text(function(d) { return d; });
+	}
+	</script>
+
+    <script>
+        $('#tit-pop').addClass('active');
+    </script>
+{% endblock %}

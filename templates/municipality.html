@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load static %}
+{% load humanize %}
+{% get_static_prefix as STATIC_PREFIX %}
+
+{% block stylesheets %}
+  <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/nv.d3.css"/>
+  <style>
+      .chartdiv svg {
+        height: 350px;
+        padding: 30px;
+      }      
+
+      .minichartdiv svg {
+        height: 200px;
+      }
+
+      .tick:not(.zero) {
+        opacity: 0;
+      }
+  </style>
+{% endblock %}
+
+
+{% block sparqlmodal %}
+This query/queries get(s) all extra information about the muncipality. This information is showed in the left side of the page, and it's obtained from <a href="http://www.geonames.org/" target="_blank">Geonames</a> (lat, long, alternative names, places within {{ municipality_info.name }}, <b>DBpedia URI</b>...) and <a href="http://dbpedia.org/" target="_blank">DBpedia</a> (description). Linked Data FTW!
+<p>Geonames:
+<pre class="prettyprint">
+{{ extra_info_queries.0 }}
+</pre>
+</p>
+{% if extra_info_queries.1 %}
+<p>DBpedia:
+<pre class="prettyprint">
+{{ extra_info_queries.1 }}
+</pre>
+</p>
+{% else %}
+<p>Query over Geonames does not return any DBpedia URI for {{ municipality_info.name }}, so we can't get any extra info form DBpedia about this municipality :-(</p>
+{% endif %}
+
+This query gets generated waste kg per person and day in {{ municipality_info.name }}:
+<pre class="prettyprint">
+{{ kg_person_year_query }}
+</pre>
+
+This query gets total waste kg by waste type and year in {{ municipality_info.name }}:
+<pre class="prettyprint">
+{{ kg_wastetype_year_query }}
+</pre>
+
+This query gets the average generated waste mass per person and day in whole Biscay:
+<pre class="prettyprint">
+{{ avg_kg_person_year_query }}
+</pre>
+
+This query gets population of {{ municipality_info.name }} by year:
+<pre class="prettyprint">
+{{ population_year_query }}
+</pre>
+{% endblock %}
+
+
+{% block content %}
+<h1 class="text-center"><small>{{ municipality_info.name }}</small></h1>
+<br />
+<div class="container">
+  <div class="row-fluid">
+    <div class="span3">
+        {% if municipality_info.alt_names|length > 0 %}
+            <blockquote>
+              <p>Alternative names:</p>
+              <small><div class="readmorelow">{{ municipality_info.alt_names|join:", " }}</div></small>
+            </blockquote>
+        {% endif %}
+
+        <p><img src="http://www.mapquestapi.com/staticmap/v4/getmap?key=Fmjtd%7Cluub2l0t2g%2C8n%3Do5-96yg0w&center={{ municipality_info.lat }},{{ municipality_info.long }}&zoom=11&size=300,200&type=hyb&pois=red_1,{{ municipality_info.lat }},{{ municipality_info.long }}&imagetype=png" class="img-polaroid"></p>
+
+        <table class="table table-condensed table-bordered">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Population</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for year, pop in population_year.items %}
+                <tr>
+                  <td>{{ year }}</td>
+                  <td>{{ pop|intcomma }}</td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% if municipality_info.description %}
+          <p><div class="readmore">{{ municipality_info.description }}</div></p>
+        {% endif %}
+    </div>
+
+    <div class="span8 offset1">
+      <p>
+        Generated total waste kg per person and day in {{ municipality_info.name }} compared with Biscay average:
+        <div class="chartdiv" id="kg_per_person">
+          <svg></svg>
+        </div>
+      </p>
+      <p>
+        Generated waste kg by year and waste type in {{ municipality_info.name }}:
+        <div class="chartdiv" id="kg_per_year">
+          <svg></svg>
+        </div>
+      </p>
+      <p>
+        Percentages of generated waste kg for each waste type:
+        <div id="kg_per_year_pies"><div class="span1"></div></div>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ STATIC_PREFIX }}js/d3.v2.min.js" type="text/javascript"></script>
+    <script src="{{ STATIC_PREFIX }}js/nv.d3.min.js" type="text/javascript"></script>
+    <script src="{{ STATIC_PREFIX }}js/jquery.expander.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}js/linkedstats_nvd3js_charts.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+      function init() {
+        draw_kg_per_year({{ kg_wastetype_year|safe }});
+        draw_kg_per_year_pie({{ kg_wastetype_year|safe }});
+        draw_kg_per_person_with_biscay_avg({{ kg_person_year|safe }}, {{ avg_kg_person_year|safe }}, '{{ municipality_info.name }}');
+      }
+
+        $(function () {
+            $('div.readmore').expander({
+                slicePoint: 150,
+                expandText: 'Read More',
+                userCollapseText: 'Hide'
+            });
+        });
+        $(function () {
+            $('div.readmorelow').expander({
+                slicePoint: 50,
+                expandText: 'More',
+                userCollapseText: 'Hide'
+            });
+        });
+    </script>
+
+    <script>
+        $('#tit-municip').addClass('active');
+    </script>
+{% endblock %}

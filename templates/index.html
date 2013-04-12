@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load static %}
+{% get_static_prefix as STATIC_PREFIX %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ STATIC_PREFIX }}css/slider.css"/>
+
+<style>
+	#heatmapArea {
+		height:600px;
+	}
+	#gen:hover{
+		background-color:grey;
+		color:black;
+	}
+	img.olTileImage {
+        max-width: none;
+    }
+	#yearsdatalider .slider-handle {
+		background: #015b4e;
+	}
+
+</style>
+{% endblock %}
+
+
+{% block sparqlmodal %}
+This query gets total kg waste per person and day for every municipalities in Biscay:
+<pre class="prettyprint">
+{{ kg_waste_person_mun_year_query }}
+</pre>
+{% endblock %}
+
+
+{% block content %}
+	<h1 class="text-center"><small>Heatmap of waste generation in Biscay</small></h1>
+	<br />
+	<p>This heatmap shows the generated waste mass by person and day for each municipality in Biscay, with a range of 0-2 kg per person and day.</p>
+	<br />
+	<div class="text-center">
+		<b>2008</b>&nbsp;&nbsp;&nbsp;<input type="text" class="span3" value="" data-slider-id="yearsdatalider" data-slider-min="2008" data-slider-max="2012" data-slider-step="1" data-slider-value="2008" id="yearslider" data-slider-handle="round" >&nbsp;&nbsp;&nbsp;<b>2012</b>
+	</div>
+	<div>
+		<button id="toggleHeatmap" class="btn btn-mini">Toggle heatmap layer</button>
+	</div>
+	<br />
+    <div class="img-polaroid"><div id="heatmapArea"></div></div>
+    <br />
+    <br />
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="{{ STATIC_PREFIX }}js/openlayers/OpenLayers.js"></script>
+<script type="text/javascript" src="{{ STATIC_PREFIX }}js/heatmap.js"></script>
+<script type="text/javascript" src="{{ STATIC_PREFIX }}js/heatmap-openlayers.js"></script>
+<script type="text/javascript" src="{{ STATIC_PREFIX }}js/bootstrap-slider.js"></script>
+<script type="text/javascript">
+	var slider = $('#yearslider').slider();
+	
+	function generateHeatmapDataset(datajson)
+	{
+		var transformedTestData = { max: datajson.max , data: [] },
+		    data = datajson.data,
+		    datalen = data.length,
+		    nudata = [];
+
+		// in order to use the OpenLayers Heatmap Layer we have to transform our data into 
+		// { max: <max>, data: [{lonlat: <OpenLayers.LonLat>, count: <count>},...]}
+
+		while(datalen--){
+		    nudata.push({
+		        lonlat: new OpenLayers.LonLat(data[datalen].lng, data[datalen].lat),
+		        count: data[datalen].count
+		    });
+		}
+
+		transformedTestData.data = nudata;
+
+		return transformedTestData;
+	}
+
+
+	function init(){
+		//var slider = $('#yearslider').slider();
+
+		var wgsProjection  = new OpenLayers.Projection("EPSG:4326");    // WGS 1984 Projection
+		var smProjection   = new OpenLayers.Projection("EPSG:900913");  // Spherical Mercator Projection
+
+		var datalist = {{ kg_waste_person_mun_year|safe }};
+		var wasteData = {
+		                max: 2,
+		                data: datalist["2008"]
+		             };
+
+		map = new OpenLayers.Map('heatmapArea');
+	  	layer = new OpenLayers.Layer.OSM();
+
+		map.addLayer(layer);
+
+		map.setCenter(new OpenLayers.LonLat(-2.871659, 43.231196).transform(wgsProjection, smProjection), 10);
+
+		// create our heatmap layer
+		var heatmap = new OpenLayers.Layer.Heatmap("Heatmap Layer", map, layer, {visible: true, radius: 25,}, 
+	    	{isBaseLayer: false, opacity: 0.3, projection: wgsProjection});
+
+
+		heatmap.setDataSet(generateHeatmapDataset(wasteData));
+
+		var size = new OpenLayers.Size(7,7);
+		var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
+		//var icon = new OpenLayers.Icon('{{ STATIC_PREFIX }}/img/mapicon.png', size, offset);
+
+		var markers = new OpenLayers.Layer.Markers("Municipalities");
+
+		//disable the autosize for the purpose of our matrix
+		OpenLayers.Popup.FramedCloud.prototype.autoSize = false;
+
+		AutoSizeFramedCloud = OpenLayers.Class(OpenLayers.Popup.FramedCloud, { 'autoSize': true });
+
+		{% for uri, municipality in municipality_points.items %}
+			var contentString = 
+			  '<div>' +
+			    '<h4>{{ municipality.name }}</h4>' +
+			    '<a href="{% url website.views.municipality municipality.name %}">More statistics</a>'
+			  '</div>';
+
+			var ll = new OpenLayers.LonLat({{ municipality.long }}, {{ municipality.lat }}).transform(wgsProjection, smProjection);
+			var popupClass = AutoSizeFramedCloud;
+			var popupContentHTML = contentString;
+
+			var feature = new OpenLayers.Feature(markers, ll); 
+			feature.closeBox = true;
+			feature.popupClass = popupClass;
+			feature.data.popupContentHTML = popupContentHTML;
+			feature.data.overflow = "auto";
+
+			feature.data.icon = new OpenLayers.Icon('{{ STATIC_PREFIX }}/img/mapicon.png', size, offset);
+			        
+			var marker = feature.createMarker();
+			//marker.defaultIcon = icon.clone();
+
+			var markerClick = function (evt) {
+			    if (this.popup == null) {
+			        this.popup = this.createPopup(this.closeBox);
+			        map.addPopup(this.popup);
+			        this.popup.show();
+			    } else {
+			        this.popup.toggle();
+			    }
+			    currentPopup = this.popup;
+			    OpenLayers.Event.stop(evt);
+			};
+			marker.events.register("mousedown", feature, markerClick);
+
+			markers.addMarker(marker);
+		{% endfor %}
+		map.addLayers([heatmap, markers]);
+
+		var heatmapChange = function() {
+	    	heatmap.setDataSet(generateHeatmapDataset({max: 2, data: datalist[slider.getValue()+'']}));
+	    };
+
+		slider = $('#yearslider').slider()
+			.on('slide', heatmapChange)
+			.data('slider');
+
+		document.getElementById("toggleHeatmap").onclick = function(){
+		    heatmap.toggle();
+		};
+	}
+</script>
+
+    <script>
+        $('#tit-map').addClass('active');
+    </script>
+{% endblock %}

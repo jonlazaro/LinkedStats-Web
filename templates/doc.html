@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load static %}
+{% get_static_prefix as STATIC_PREFIX %}
+
+{% block content %}
+<h1 id="centered"><small>Data sources</small></h1>
+<p>Population data extracted from <a href="http://www.ine.es/jaxi/menu.do?type=pcaxis&path=%2Ft20%2Fe245&file=inebase&L=0" target="_blank">Spanish Institute of Statistics</a> by CSV-scrapping.</p>
+
+<p>Waste data extracted from <a href="http://www.bizkaia.net/home2/Temas/DetalleTema.asp?Tem_Codigo=7709&idioma=CA&bnetmobile=0&dpto_biz=9&codpath_biz=9|351|7709">Council of Biscay</a> by PDF-scrapping.</p>
+
+<h1 id="centered"><small>Data Model</small></h1>
+<p>Based on <a href="http://www.w3.org/TR/2013/WD-vocab-data-cube-20130312/" target="_blank">RDF Data Cube vocabulary</a>.</p>
+<p>DSD and Dataset descriptions available at:</p>
+<h4>Population dataset</h4>
+<dl class="dl-horizontal">
+  <dt>DSD</dt>
+  <dd><a href="http://helheim.deusto.es/linkedstats/resource/dsd/population" target="_blank">http://helheim.deusto.es/linkedstats/resource/dsd/population</a></dd>
+  <dt>Dataset</dt>
+  <dd><a href="http://helheim.deusto.es/linkedstats/resource/dataset/population" target="_blank">http://helheim.deusto.es/linkedstats/resource/dataset/population</a></dd>
+</dl>
+<h4>Waste dataset</h4>
+<dl class="dl-horizontal">
+  <dt>DSD</dt>
+  <dd><a href="http://helheim.deusto.es/linkedstats/resource/dsd/waste" target="_blank">http://helheim.deusto.es/linkedstats/resource/dsd/waste</a></dd>
+  <dt>Dataset</dt>
+  <dd><a href="http://helheim.deusto.es/linkedstats/resource/dataset/waste" target="_blank">http://helheim.deusto.es/linkedstats/resource/dataset/waste</a></dd>
+</dl>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$('#tit-doc').addClass('active');
+</script>
+{% endblock %}
