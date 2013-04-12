@@ -56,6 +56,7 @@ This query gets total kg waste per person and day for every municipalities in Bi
 <script type="text/javascript" src="{{ STATIC_PREFIX }}js/heatmap.js"></script>
 <script type="text/javascript" src="{{ STATIC_PREFIX }}js/heatmap-openlayers.js"></script>
 <script type="text/javascript" src="{{ STATIC_PREFIX }}js/bootstrap-slider.js"></script>
+<script type="text/javascript" src="{{ STATIC_PREFIX }}js/proj4js-compressed.js"></script>
 <script type="text/javascript">
 	var slider = $('#yearslider').slider();
 	
@@ -84,6 +85,8 @@ This query gets total kg waste per person and day for every municipalities in Bi
 
 	function init(){
 		//var slider = $('#yearslider').slider();
+        Proj4js.defs["EPSG:23030"] = "+proj=utm +zone=30 +ellps=intl +towgs84=-131,-100.3,-163.4,-1.244,-0.020,-1.144,9.39 +units=m +no_defs";
+
 
 		var wgsProjection  = new OpenLayers.Projection("EPSG:4326");    // WGS 1984 Projection
 		var smProjection   = new OpenLayers.Projection("EPSG:900913");  // Spherical Mercator Projection
@@ -102,8 +105,7 @@ This query gets total kg waste per person and day for every municipalities in Bi
 		map.setCenter(new OpenLayers.LonLat(-2.871659, 43.231196).transform(wgsProjection, smProjection), 10);
 
 		// create our heatmap layer
-		var heatmap = new OpenLayers.Layer.Heatmap("Heatmap Layer", map, layer, {visible: true, radius: 25,}, 
-	    	{isBaseLayer: false, opacity: 0.3, projection: wgsProjection});
+		var heatmap = new OpenLayers.Layer.Heatmap("Heatmap Layer", map, layer, {visible: true, radius: 25,}, {isBaseLayer: false, opacity: 0.3, projection: wgsProjection});
 
 
 		heatmap.setDataSet(generateHeatmapDataset(wasteData));
