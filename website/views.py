@@ -25,7 +25,8 @@ GEONAMES_CODES = {
     'V': 'forest, heath, ...'
 }
 
-JSON_PATH = os.path.abspath(os.path.join(os.getcwd(), 'municipality_geonames.json'))
+#JSON_PATH = os.path.abspath(os.path.join(os.getcwd(), 'municipality_geonames.json'))
+JSON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../municipality_geonames.json'))
 MUNICIPALITY_DICT = json.load(open(JSON_PATH))
 
 def index(request):

@@ -6,7 +6,8 @@ from sets import Set
 import os
 import json
 
-JSON_LATLONG_PATH = os.path.abspath(os.path.join(os.getcwd(), 'municipality_latlong.json'))
+#JSON_LATLONG_PATH = os.path.abspath(os.path.join(os.getcwd(), 'municipality_latlong.json'))
+JSON_LATLONG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'municipality_latlong.json'))
 MUNICIPALITY_LATLNG_DICT = json.load(open(JSON_LATLONG_PATH))
 
 GEONAMES_SPARQL = SPARQLWrapper("http://helheim.deusto.es/geonames/sparql")
