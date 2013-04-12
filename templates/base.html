@@ -58,7 +58,7 @@
                           <li id="tit-municip"><a href="{% url website.views.municipality_search %}">Data per municipality</a></li>
                         </ul>
                     </li>
-                    <li id="tit-doc"><a href="/doc">Documentation</a></li>
+                    <li id="tit-doc"><a href="{% url website.views.doc %}">Documentation</a></li>
                     <li><a href="http://helheim.deusto.es/linkedstats/sparql" target="_blank">SPARQL Endpoint</a></li>
                 </ul>
                 <a data-toggle="modal" href="#myModal" class="btn btn-primary btn-small pull-right">SPARQL queries used in this page&nbsp;&nbsp;&nbsp;<img src="{{ STATIC_PREFIX }}img/rdf-icon.png" width=25/></a>
