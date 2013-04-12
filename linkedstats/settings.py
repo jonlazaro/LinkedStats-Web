@@ -1,10 +1,11 @@
 # Django settings for linkedstats project.
+import os
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
+    # ('Your Name', 'jlazaro@deusto.es'),
 )
 
 MANAGERS = ADMINS
@@ -31,7 +32,7 @@ TIME_ZONE = 'Europe/Madrid'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'es-ES'
+LANGUAGE_CODE = 'en'
 
 SITE_ID = 1
 
@@ -72,8 +73,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    #'http://helheim.deusto.es/linkedstats/static',
-    '/home/jon/morelab/basuras/linkedstats/static',
+    os.path.abspath(os.path.join(os.getcwd(), 'static')),
 )
 
 # List of finder classes that know how to find static files in
@@ -108,7 +108,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    '/home/jon/morelab/basuras/linkedstats/templates',
+    os.path.abspath(os.path.join(os.getcwd(), 'templates')),
 )
 
 INSTALLED_APPS = (
