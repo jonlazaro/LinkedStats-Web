@@ -61,15 +61,15 @@
                     <li id="tit-doc"><a href="{% url website.views.doc %}">Documentation</a></li>
                     <li><a href="http://helheim.deusto.es/linkedstats/sparql" target="_blank">SPARQL Endpoint</a></li>
                 </ul>
-                <a data-toggle="modal" href="#myModal" class="btn btn-primary btn-small pull-right">SPARQL queries used in this page&nbsp;&nbsp;&nbsp;<img src="{{ STATIC_PREFIX }}img/rdf-icon.png" width=25/></a>
+                <a data-toggle="modal" href="#sparqlqueries" class="btn btn-primary btn-small pull-right">SPARQL queries used in this page&nbsp;&nbsp;&nbsp;<img src="{{ STATIC_PREFIX }}img/rdf-icon.png" width=25/></a>
             </div>
         </div>
     </div>
 
-    <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div id="sparqlqueries" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="sparqlquerieslabel" aria-hidden="true">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="myModalLabel">SPARQL Queries</h3>
+            <h3 id="sparqlquerieslabel">SPARQL Queries</h3>
         </div>
         <div class="modal-body">
             <p>{% block sparqlmodal %}No SPARQL queries in this page{% endblock %}</p>
